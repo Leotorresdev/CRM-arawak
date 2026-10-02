@@ -95,13 +95,14 @@ export default function LoginPage() {
         <div className="absolute -top-32 -left-32 size-96 rounded-full bg-[#4b5e2a]/20 blur-3xl pointer-events-none" />
         <div className="absolute -bottom-32 -right-32 size-96 rounded-full bg-amber-500/15 blur-3xl pointer-events-none" />
 
-        {/* Brand Header: Solo Nombre de la Empresa */}
-        <div className="relative z-10 flex items-center gap-3">
-          <div className="grid size-12 shrink-0 place-items-center rounded-2xl bg-[#4b5e2a] text-xl font-black text-white shadow-lg shadow-[#4b5e2a]/25">
-            AW
-          </div>
-          <div>
-            <span className="text-2xl font-black tracking-tight text-sidebar-foreground">Arawak</span>
+        {/* Brand Header: Logo Oficial Arawak */}
+        <div className="relative z-10 flex items-center">
+          <div className="rounded-2xl bg-white px-5 py-3 shadow-xl shadow-black/5 border border-border/40 backdrop-blur-sm">
+            <img
+              src="/logo-arawak.png"
+              alt="Arawak Alimentos Sin Gluten"
+              className="h-14 w-auto object-contain"
+            />
           </div>
         </div>
 
@@ -131,13 +132,14 @@ export default function LoginPage() {
           transition={{ duration: 0.35 }}
           className="w-full max-w-md space-y-6"
         >
-          {/* Mobile Header: Solo Nombre de la Empresa */}
-          <div className="lg:hidden flex items-center gap-3 mb-4">
-            <div className="grid size-10 shrink-0 place-items-center rounded-xl bg-[#4b5e2a] text-lg font-black text-white">
-              AW
-            </div>
-            <div>
-              <p className="text-xl font-black tracking-tight">Arawak</p>
+          {/* Logo Oficial Arawak para el Formulario */}
+          <div className="flex items-center justify-start">
+            <div className="rounded-xl bg-white px-4 py-2 shadow-xs border border-border/60">
+              <img
+                src="/logo-arawak.png"
+                alt="Arawak Alimentos Sin Gluten"
+                className="h-10 sm:h-12 w-auto object-contain"
+              />
             </div>
           </div>
 

@@ -146,18 +146,32 @@ function NavList({ collapsed, onNavigate }: { collapsed: boolean; onNavigate?: (
 
 function Brand({ collapsed }: { collapsed: boolean }) {
   return (
-    <Link href="/" className="flex h-16 items-center gap-3 px-5 transition-opacity hover:opacity-90">
-      <div className="grid size-9 shrink-0 place-items-center rounded-lg bg-[#4b5e2a] text-sm font-black text-white shadow-sm">
-        AW
-      </div>
-      {!collapsed && (
-        <div className="min-w-0">
-          <p className="truncate text-base font-extrabold leading-tight tracking-tight text-foreground">
-            Arawak
-          </p>
-          <p className="truncate text-[11px] text-[#4b5e2a] dark:text-[#7ba045] font-bold">
-            Control de Calidad
-          </p>
+    <Link
+      href="/"
+      className="flex h-20 items-center justify-start px-4 transition-opacity hover:opacity-95"
+    >
+      {collapsed ? (
+        <div className="mx-auto flex size-10 items-center justify-center rounded-xl bg-white p-1 shadow-xs border border-border/60">
+          <img
+            src="/logo-arawak.png"
+            alt="Arawak Logo"
+            className="w-full h-full object-contain"
+          />
+        </div>
+      ) : (
+        <div className="flex items-center gap-2.5 w-full">
+          <div className="rounded-xl bg-white px-3 py-1.5 shadow-xs border border-border/60 shrink-0">
+            <img
+              src="/logo-arawak.png"
+              alt="Arawak Alimentos Sin Gluten"
+              className="h-9 w-auto max-w-[170px] object-contain"
+            />
+          </div>
+          <div className="hidden xl:flex flex-col">
+            <span className="text-[10px] font-black uppercase tracking-wider text-[#4b5e2a] dark:text-[#8cb852] bg-[#4b5e2a]/10 px-1.5 py-0.5 rounded">
+              CRM QA
+            </span>
+          </div>
         </div>
       )}
     </Link>
@@ -225,21 +239,31 @@ export function AppShell({
       <div className={cn("transition-[padding] duration-300", collapsed ? "lg:pl-[84px]" : "lg:pl-[272px]")}>
         <header className="sticky top-0 z-30 border-b border-border bg-background/80 backdrop-blur-xl">
           <div className="grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-3 px-4 py-3 sm:px-6">
-            {/* Mobile Trigger */}
-            <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
-              <SheetTrigger asChild>
-                <Button variant="ghost" size="icon" className="lg:hidden">
-                  <Menu className="size-5" />
-                </Button>
-              </SheetTrigger>
-              <SheetContent side="left" className="w-72 bg-sidebar p-0">
-                <SheetTitle className="sr-only">Navegación</SheetTitle>
-                <Brand collapsed={false} />
-                <div className="overflow-y-auto max-h-[calc(100vh-4rem)] pb-6">
-                  <NavList collapsed={false} onNavigate={() => setMobileOpen(false)} />
-                </div>
-              </SheetContent>
-            </Sheet>
+            {/* Mobile Trigger & Logo */}
+            <div className="flex items-center gap-2 lg:hidden">
+              <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
+                <SheetTrigger asChild>
+                  <Button variant="ghost" size="icon">
+                    <Menu className="size-5" />
+                  </Button>
+                </SheetTrigger>
+                <SheetContent side="left" className="w-72 bg-sidebar p-0">
+                  <SheetTitle className="sr-only">Navegación</SheetTitle>
+                  <Brand collapsed={false} />
+                  <div className="overflow-y-auto max-h-[calc(100vh-4rem)] pb-6">
+                    <NavList collapsed={false} onNavigate={() => setMobileOpen(false)} />
+                  </div>
+                </SheetContent>
+              </Sheet>
+
+              <div className="rounded-lg bg-white px-2 py-1 border border-border/50 shadow-2xs">
+                <img
+                  src="/logo-arawak.png"
+                  alt="Arawak Logo"
+                  className="h-6 w-auto object-contain"
+                />
+              </div>
+            </div>
 
             <div className="flex-1" />
 

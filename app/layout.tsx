@@ -17,7 +17,7 @@ export const metadata: Metadata = {
   },
   description: "Sistema integral de gestión de calidad, HACCP, BPM, laboratorio, liberación de lotes y control de inocuidad en planta de producción de galletas.",
   icons: {
-    icon: "/favicon.ico",
+    icon: "/logo-arawak.png",
   },
 };
 
