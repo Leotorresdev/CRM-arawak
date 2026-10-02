@@ -354,77 +354,84 @@ export function FormatoSanitizacion() {
   return (
     <div className="space-y-6">
       {/* Top Banner & Company Identity */}
-      <div className="surface-card p-6 border-l-4 border-l-[#4b5e2a] bg-gradient-to-r from-card via-card to-[#4b5e2a]/5">
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-          <div>
-            <div className="flex items-center gap-2 mb-1">
-              <span className="bg-[#4b5e2a] text-white px-2.5 py-0.5 rounded text-xs font-bold uppercase tracking-wider">
+      <div className="surface-card p-5 sm:p-6 border-l-4 border-l-[#4b5e2a] bg-gradient-to-r from-card via-card to-[#4b5e2a]/5 shadow-xs">
+        <div className="flex flex-col gap-4">
+          {/* Header Title & Identity */}
+          <div className="min-w-0">
+            <div className="flex flex-wrap items-center gap-2 mb-2">
+              <span className="bg-[#4b5e2a] text-white px-2.5 py-0.5 rounded text-xs font-bold uppercase tracking-wider whitespace-nowrap">
                 Arawak · Planta de Producción
               </span>
-              <Badge variant="outline" className="border-[#4b5e2a]/40 text-[#4b5e2a] bg-[#4b5e2a]/10 font-semibold">
+              <Badge variant="outline" className="border-[#4b5e2a]/40 text-[#4b5e2a] dark:text-[#7ba045] bg-[#4b5e2a]/10 font-semibold text-xs whitespace-nowrap">
                 Línea Galletas de Cambur y Yuca (Sin Gluten)
               </Badge>
+              <Badge variant="secondary" className="text-xs font-mono font-medium whitespace-nowrap">
+                POES-01 / BPM-02
+              </Badge>
             </div>
-            <h2 className="text-2xl font-bold tracking-tight text-foreground">
+            <h2 className="text-xl sm:text-2xl font-black tracking-tight text-foreground">
               Formato de Sanitización y Buenas Prácticas de Manufactura (BPM)
             </h2>
-            <p className="text-sm text-muted-foreground mt-0.5">
+            <p className="text-xs sm:text-sm text-muted-foreground mt-1 max-w-4xl">
               Digitalización oficial de planillas operativas para reemplazo de hojas de cálculo físicas en planta.
             </p>
           </div>
 
-          <div className="flex flex-wrap items-center gap-2 shrink-0">
+          {/* Action Toolbar & Controls */}
+          <div className="flex flex-wrap items-center justify-between gap-3 pt-3 border-t border-border/50">
             {/* Week navigation */}
-            <div className="flex items-center border border-border rounded-lg bg-secondary/30 px-2 py-1 gap-2">
-              <Calendar className="size-4 text-muted-foreground" />
-              <span className="text-xs font-bold font-mono">{semanaInfo.texto}</span>
+            <div className="flex items-center border border-border rounded-lg bg-secondary/40 px-3 py-1.5 gap-2">
+              <Calendar className="size-4 text-[#4b5e2a]" />
+              <span className="text-xs font-bold font-mono text-foreground">{semanaInfo.texto}</span>
             </div>
 
-            <input
-              type="file"
-              ref={fileInputRef}
-              onChange={handleImportExcel}
-              accept=".xlsx,.xls"
-              className="hidden"
-            />
+            <div className="flex flex-wrap items-center gap-2">
+              <input
+                type="file"
+                ref={fileInputRef}
+                onChange={handleImportExcel}
+                accept=".xlsx,.xls"
+                className="hidden"
+              />
 
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => fileInputRef.current?.click()}
-              className="gap-1.5 cursor-pointer text-xs"
-              title="Importar registro semanal desde archivo Excel"
-            >
-              <Upload className="size-3.5 text-[#4b5e2a]" /> Importar Excel
-            </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => fileInputRef.current?.click()}
+                className="gap-1.5 cursor-pointer text-xs font-semibold border-border hover:bg-secondary"
+                title="Importar registro semanal desde archivo Excel"
+              >
+                <Upload className="size-3.5 text-[#4b5e2a]" /> Importar Excel
+              </Button>
 
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => exportarSanitizacionExcel(saneamientoItems, higieneItems, semanaInfo.texto, firmaCalidadSaneamiento)}
-              className="gap-1.5 cursor-pointer text-xs"
-              title="Descargar registro en archivo Excel (.xlsx)"
-            >
-              <FileSpreadsheet className="size-3.5 text-[#4b5e2a]" /> Exportar Excel
-            </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => exportarSanitizacionExcel(saneamientoItems, higieneItems, semanaInfo.texto, firmaCalidadSaneamiento)}
+                className="gap-1.5 cursor-pointer text-xs font-semibold border-border hover:bg-secondary"
+                title="Descargar registro en archivo Excel (.xlsx)"
+              >
+                <FileSpreadsheet className="size-3.5 text-[#4b5e2a]" /> Exportar Excel
+              </Button>
 
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => window.print()}
-              className="gap-2 cursor-pointer print:hidden text-xs"
-              title="Imprimir formato oficial para auditoría"
-            >
-              <Printer className="size-3.5" /> Imprimir
-            </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => window.print()}
+                className="gap-2 cursor-pointer print:hidden text-xs font-semibold border-border hover:bg-secondary"
+                title="Imprimir formato oficial para auditoría"
+              >
+                <Printer className="size-3.5" /> Imprimir
+              </Button>
 
-            <Button
-              size="sm"
-              onClick={handleGuardarCambios}
-              className="gap-2 bg-[#4b5e2a] hover:bg-[#3d4d22] text-white cursor-pointer shadow-sm text-xs"
-            >
-              <Save className="size-3.5" /> Guardar Cambios
-            </Button>
+              <Button
+                size="sm"
+                onClick={handleGuardarCambios}
+                className="gap-2 bg-[#4b5e2a] hover:bg-[#3d4d22] text-white cursor-pointer shadow-xs text-xs font-bold"
+              >
+                <Save className="size-3.5" /> Guardar Cambios
+              </Button>
+            </div>
           </div>
         </div>
 

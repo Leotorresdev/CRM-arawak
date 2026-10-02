@@ -441,20 +441,20 @@ export function LimpiezaPlanta() {
     <div className="space-y-6 pb-16">
       {/* 1. Header Banner & Document Identity */}
       <div className="rounded-xl border border-border bg-card p-5 shadow-xs">
-        <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-          <div className="flex items-start gap-3">
+        <div className="flex flex-col gap-4">
+          <div className="flex items-start gap-3 min-w-0">
             <div className="flex size-12 shrink-0 items-center justify-center rounded-xl bg-[#4b5e2a] text-white shadow-xs">
               <Factory className="size-6" />
             </div>
-            <div>
+            <div className="min-w-0 flex-1">
               <div className="flex flex-wrap items-center gap-2">
-                <span className="text-xs font-bold uppercase tracking-wider text-[#4b5e2a] dark:text-[#7ba045]">
+                <span className="text-xs font-bold uppercase tracking-wider text-[#4b5e2a] dark:text-[#7ba045] whitespace-nowrap">
                   POES · Saneamiento Operativo Industrial
                 </span>
-                <Badge variant="outline" className="border-[#4b5e2a]/40 bg-[#4b5e2a]/10 text-[#4b5e2a] dark:text-[#7ba045] font-semibold text-[11px]">
+                <Badge variant="outline" className="border-[#4b5e2a]/40 bg-[#4b5e2a]/10 text-[#4b5e2a] dark:text-[#7ba045] font-semibold text-[11px] whitespace-nowrap">
                   Código: ARAWAK-CC-LP-01
                 </Badge>
-                <Badge variant="secondary" className="text-[11px] font-medium">
+                <Badge variant="secondary" className="text-[11px] font-medium whitespace-nowrap">
                   Rev. 04 · Vigente
                 </Badge>
               </div>
@@ -468,7 +468,7 @@ export function LimpiezaPlanta() {
           </div>
 
           {/* Quick Global Action Buttons */}
-          <div className="flex flex-wrap items-center gap-2 print:hidden">
+          <div className="flex flex-wrap items-center justify-between gap-2.5 pt-3 border-t border-border/50 print:hidden">
             <Button
               variant="outline"
               size="sm"
@@ -478,50 +478,53 @@ export function LimpiezaPlanta() {
               <BookOpen className="size-3.5 text-[#4b5e2a]" />
               {mostrarGuia8Pasos ? "Ocultar Guía POES" : "Guía 8 Pasos POES"}
             </Button>
-            <input
-              type="file"
-              ref={fileInputRef}
-              onChange={handleImportExcel}
-              accept=".xlsx,.xls"
-              className="hidden"
-            />
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => fileInputRef.current?.click()}
-              className="gap-1.5 border-border hover:bg-muted text-xs cursor-pointer"
-              title="Importar registros de limpieza desde archivo Excel"
-            >
-              <Upload className="size-3.5 text-[#4b5e2a]" />
-              Importar Excel
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={handleExportExcel}
-              className="gap-1.5 border-border hover:bg-muted text-xs cursor-pointer"
-              title="Descargar libro POES en formato Excel (.xlsx)"
-            >
-              <FileSpreadsheet className="size-3.5 text-[#4b5e2a]" />
-              Exportar Excel
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={handlePrint}
-              className="gap-1.5 border-border hover:bg-muted text-xs"
-            >
-              <Printer className="size-3.5" />
-              Imprimir
-            </Button>
-            <Button
-              size="sm"
-              onClick={handleGuardar}
-              className="gap-1.5 bg-[#4b5e2a] hover:bg-[#3d4d22] text-white shadow-xs text-xs font-semibold"
-            >
-              <Save className="size-3.5" />
-              Guardar Cambios
-            </Button>
+
+            <div className="flex flex-wrap items-center gap-2">
+              <input
+                type="file"
+                ref={fileInputRef}
+                onChange={handleImportExcel}
+                accept=".xlsx,.xls"
+                className="hidden"
+              />
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => fileInputRef.current?.click()}
+                className="gap-1.5 border-border hover:bg-muted text-xs cursor-pointer font-semibold"
+                title="Importar registros de limpieza desde archivo Excel"
+              >
+                <Upload className="size-3.5 text-[#4b5e2a]" />
+                Importar Excel
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleExportExcel}
+                className="gap-1.5 border-border hover:bg-muted text-xs cursor-pointer font-semibold"
+                title="Descargar libro POES en formato Excel (.xlsx)"
+              >
+                <FileSpreadsheet className="size-3.5 text-[#4b5e2a]" />
+                Exportar Excel
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handlePrint}
+                className="gap-1.5 border-border hover:bg-muted text-xs font-semibold"
+              >
+                <Printer className="size-3.5" />
+                Imprimir
+              </Button>
+              <Button
+                size="sm"
+                onClick={handleGuardar}
+                className="gap-1.5 bg-[#4b5e2a] hover:bg-[#3d4d22] text-white shadow-xs text-xs font-bold"
+              >
+                <Save className="size-3.5" />
+                Guardar Cambios
+              </Button>
+            </div>
           </div>
         </div>
 
