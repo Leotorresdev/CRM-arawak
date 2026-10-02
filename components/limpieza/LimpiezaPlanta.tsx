@@ -12,7 +12,6 @@ import {
   Sparkles,
   ShieldCheck,
   Filter,
-  Search,
   CheckCheck,
   RotateCcw,
   BookOpen,
@@ -64,33 +63,30 @@ export function LimpiezaPlanta() {
     return d.toISOString().split("T")[0];
   });
   const [turnoGlobal, setTurnoGlobal] = useState<string>("Turno Mañana (06:00 - 14:00)");
-  const [observacionesGenerales, setObservacionesGenerales] = useState<string>(
-    "Limpieza operativa ejecutada conforme al POES de la planta de producción sin gluten. Sin incidentes biológicos."
-  );
+  const [observacionesGenerales, setObservacionesGenerales] = useState<string>("");
 
   // States for Cuadro 1 & Cuadro 2
   const [ejecucionData, setEjecucionData] = useState<Record<number, RegistroEjecucion8Pasos>>(initialEjecucionData);
   const [inspeccionData, setInspeccionData] = useState<Record<number, RegistroInspeccionCalidad>>(initialInspeccionData);
 
-  // Filters & Search
-  const [busqueda, setBusqueda] = useState("");
+  // Filters (Category & Frequency)
   const [filtroCategoria, setFiltroCategoria] = useState<string>("todas");
   const [filtroFrecuencia, setFiltroFrecuencia] = useState<string>("todas");
   const [mostrarGuia8Pasos, setMostrarGuia8Pasos] = useState(false);
 
   // Única firma: Ingeniero de Guardia en Control de Calidad
   const [firmaCalidadEjecucion, setFirmaCalidadEjecucion] = useState({
-    firmado: true,
-    nombre: "Mariana Cárdenas",
-    cargo: "Inspector QA Planta",
-    fecha: "30/09/2026 14:30",
+    firmado: false,
+    nombre: "",
+    cargo: "",
+    fecha: "",
   });
 
   const [firmaCalidadInspeccion, setFirmaCalidadInspeccion] = useState({
-    firmado: true,
-    nombre: "Mariana Cárdenas",
-    cargo: "Inspector QA Planta",
-    fecha: "30/09/2026 15:10",
+    firmado: false,
+    nombre: "",
+    cargo: "",
+    fecha: "",
   });
 
   const handleFirmarEjecucion = () => {
@@ -323,17 +319,11 @@ export function LimpiezaPlanta() {
   // Filtered areas
   const areasFiltradas = useMemo(() => {
     return areasEquiposLimpieza.filter((area) => {
-      const coincideBusqueda =
-        area.nombre.toLowerCase().includes(busqueda.toLowerCase()) ||
-        area.frecuencia.toLowerCase().includes(busqueda.toLowerCase()) ||
-        area.categoria.toLowerCase().includes(busqueda.toLowerCase());
-
       const coincideCat = filtroCategoria === "todas" || area.categoria === filtroCategoria;
       const coincideFrec = filtroFrecuencia === "todas" || area.frecuencia.toLowerCase() === filtroFrecuencia.toLowerCase();
-
-      return coincideBusqueda && coincideCat && coincideFrec;
+      return coincideCat && coincideFrec;
     });
-  }, [busqueda, filtroCategoria, filtroFrecuencia]);
+  }, [filtroCategoria, filtroFrecuencia]);
 
   // Statistics
   const stats = useMemo(() => {
@@ -746,19 +736,8 @@ export function LimpiezaPlanta() {
           </button>
         </div>
 
-        {/* Category & Frequency Filter + Search */}
+        {/* Category & Frequency Filters */}
         <div className="flex flex-wrap items-center gap-2">
-          {/* Search */}
-          <div className="relative min-w-[160px] max-w-xs">
-            <Search className="pointer-events-none absolute left-2.5 top-1/2 size-3.5 -translate-y-1/2 text-muted-foreground" />
-            <Input
-              type="text"
-              placeholder="Buscar equipo o área..."
-              value={busqueda}
-              onChange={(e) => setBusqueda(e.target.value)}
-              className="h-8 pl-8 text-xs border-border bg-background"
-            />
-          </div>
 
           {/* Category */}
           <select

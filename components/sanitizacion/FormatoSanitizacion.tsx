@@ -61,15 +61,15 @@ export function FormatoSanitizacion() {
 
   // Única firma: Ingeniero de Guardia en Control de Calidad
   const [firmaCalidadSaneamiento, setFirmaCalidadSaneamiento] = useState<{ firmado: boolean; fecha: string; inspector: string }>({
-    firmado: true,
-    fecha: "30/09/2026 07:30",
-    inspector: "Ingeniero de Guardia (Control de Calidad)",
+    firmado: false,
+    fecha: "",
+    inspector: "",
   });
 
   const [firmaCalidadHigiene, setFirmaCalidadHigiene] = useState<{ firmado: boolean; fecha: string; inspector: string }>({
-    firmado: true,
-    fecha: "30/09/2026 07:45",
-    inspector: "Ingeniero de Guardia (Control de Calidad)",
+    firmado: false,
+    fecha: "",
+    inspector: "",
   });
 
   // Load from localStorage & Supabase

@@ -14,7 +14,6 @@ import {
   AlertTriangle,
   Layers,
   FileCheck2,
-  Search,
   Download,
   Info,
   ChevronRight,

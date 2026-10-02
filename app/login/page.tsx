@@ -18,29 +18,25 @@ import { toast } from "sonner";
 import {
   autenticarUsuario,
   registrarNuevoUsuario,
-  getUsuariosRegistrados,
   isAutenticado,
-  UsuarioArawak,
 } from "@/lib/auth";
 
 export default function LoginPage() {
   const router = useRouter();
   const [tab, setTab] = useState<"login" | "registro">("login");
   const [isLoading, setIsLoading] = useState(false);
-  const [usuariosDisponibles, setUsuariosDisponibles] = useState<(UsuarioArawak & { password?: string })[]>([]);
 
   // Form states - Login
-  const [usuario, setUsuario] = useState("Roberto");
-  const [password, setPassword] = useState("arawak2026");
+  const [usuario, setUsuario] = useState("");
+  const [password, setPassword] = useState("");
 
   // Form states - Registro
   const [regNombre, setRegNombre] = useState("");
-  const [regCargo, setRegCargo] = useState("Inspector de Control de Calidad");
+  const [regCargo, setRegCargo] = useState("");
   const [regRol, setRegRol] = useState<"calidad" | "produccion" | "gerencia">("calidad");
-  const [regPassword, setRegPassword] = useState("arawak2026");
+  const [regPassword, setRegPassword] = useState("");
 
   useEffect(() => {
-    setUsuariosDisponibles(getUsuariosRegistrados());
     if (typeof window !== "undefined" && isAutenticado()) {
       router.replace("/");
     }
@@ -89,14 +85,6 @@ export default function LoginPage() {
       });
       window.location.href = "/";
     }, 450);
-  };
-
-  const handleSeleccionarCuentaRapida = (u: UsuarioArawak & { password?: string }) => {
-    setUsuario(u.nombre);
-    setPassword(u.password || "arawak2026");
-    toast.info(`Usuario cargado: ${u.nombre}`, {
-      description: `${u.cargo}`,
-    });
   };
 
   return (
@@ -203,7 +191,7 @@ export default function LoginPage() {
                   <Input
                     id="usuario"
                     type="text"
-                    placeholder="Ej. Roberto / Pedro / Tu Nombre"
+                    placeholder="Ingresa tu usuario o nombre completo"
                     value={usuario}
                     onChange={(e) => setUsuario(e.target.value)}
                     required
@@ -243,33 +231,6 @@ export default function LoginPage() {
                 {isLoading ? "Validando credenciales..." : "Ingresar al CRM"}
                 <ArrowRight className="size-4" />
               </Button>
-
-              {/* Quick Fill Credentials Bar for Team */}
-              <div className="mt-4 pt-4 border-t border-border space-y-2">
-                <p className="text-[11px] font-extrabold uppercase tracking-wider text-muted-foreground">
-                  Ingreso Rápido por Usuario:
-                </p>
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
-                  {usuariosDisponibles.slice(0, 3).map((u) => (
-                    <button
-                      type="button"
-                      key={u.id}
-                      onClick={() => handleSeleccionarCuentaRapida(u)}
-                      className={`text-left rounded-lg border p-2 transition-all cursor-pointer ${
-                        usuario.toLowerCase() === u.nombre.toLowerCase()
-                          ? "border-[#4b5e2a] bg-[#4b5e2a]/10 ring-1 ring-[#4b5e2a]"
-                          : "border-border hover:bg-muted/60"
-                      }`}
-                    >
-                      <p className="text-[11px] font-bold text-foreground truncate">{u.nombre}</p>
-                      <p className="text-[10px] text-muted-foreground truncate">{u.cargo}</p>
-                    </button>
-                  ))}
-                </div>
-                <p className="text-[10px] text-muted-foreground text-center pt-1">
-                  Clave para cuentas demo: <code className="font-mono font-bold text-foreground">arawak2026</code>
-                </p>
-              </div>
             </form>
           )}
 

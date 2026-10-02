@@ -10,7 +10,6 @@ import {
   Moon,
   PanelLeftClose,
   PanelLeftOpen,
-  Search,
   Sun,
   FileCheck2,
   WheatOff,
@@ -22,7 +21,6 @@ import {
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -243,15 +241,7 @@ export function AppShell({
               </SheetContent>
             </Sheet>
 
-            {/* Plant Search */}
-            <div className="relative hidden min-w-0 md:block md:max-w-md">
-              <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
-              <Input
-                placeholder="Buscar en registros de sanitización..."
-                className="h-10 border-border bg-secondary/60 pl-9 text-xs"
-              />
-            </div>
-            <div className="md:hidden" />
+            <div className="flex-1" />
 
             {/* Header Right Controls */}
             <div className="flex items-center gap-2 justify-self-end">

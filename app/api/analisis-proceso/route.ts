@@ -7,8 +7,8 @@ import {
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
-  const userId = searchParams.get("userId") || "usr_roberto";
-  const userNombre = searchParams.get("userNombre") || "Ing. Roberto Valladares";
+  const userId = searchParams.get("userId") || "usr_calidad";
+  const userNombre = searchParams.get("userNombre") || "Inspector de Calidad";
 
   return NextResponse.json({
     empresa: "Arawak",

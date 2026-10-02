@@ -126,14 +126,14 @@ export const initialEjecucionData: Record<number, RegistroEjecucion8Pasos> = are
     acc[area.id] = {
       areaId: area.id,
       turnoResponsable: "Turno Mañana (06:00 - 14:00)",
-      paso1_prelimpiezaSeco: true,
-      paso2_enjuagueInicialAgua: true,
-      paso3_aplicacionDetergente: true,
-      paso4_fregadoContacto: true,
-      paso5_enjuagueFinalJabon: true,
-      paso6_aplicacionDesinfectante: true,
-      paso7_enjuagueFinalDesinfectante: true,
-      paso8_secado: true,
+      paso1_prelimpiezaSeco: false,
+      paso2_enjuagueInicialAgua: false,
+      paso3_aplicacionDetergente: false,
+      paso4_fregadoContacto: false,
+      paso5_enjuagueFinalJabon: false,
+      paso6_aplicacionDesinfectante: false,
+      paso7_enjuagueFinalDesinfectante: false,
+      paso8_secado: false,
       observaciones: "",
     };
     return acc;
@@ -145,7 +145,7 @@ export const initialInspeccionData: Record<number, RegistroInspeccionCalidad> = 
   (acc, area) => {
     acc[area.id] = {
       areaId: area.id,
-      conforme: true,
+      conforme: false,
       noConforme: false,
       correctivo: false,
       accionCorrectiva: "",

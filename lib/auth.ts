@@ -14,66 +14,69 @@ export interface UsuarioArawak {
   creadoEn?: string;
 }
 
-export const USUARIOS_INICIALES: (UsuarioArawak & { password: string })[] = [
-  {
-    id: "usr_roberto",
-    nombre: "Ing. Roberto Valladares",
-    email: "roberto@arawak.com",
-    cargo: "Inspector de Control de Calidad",
-    rol: "calidad",
-    cedula: "V-19.824.103",
-    password: "arawak2026",
-    creadoEn: "2026-09-01",
-  },
-  {
-    id: "usr_pedro",
-    nombre: "Pedro Gómez",
-    email: "pedro@arawak.com",
-    cargo: "Supervisor de Producción y Procesos",
-    rol: "produccion",
-    cedula: "V-17.450.922",
-    password: "arawak2026",
-    creadoEn: "2026-09-05",
-  },
-  {
-    id: "usr_laura",
-    nombre: "Ing. Laura Montilla",
-    email: "laura@arawak.com",
-    cargo: "Jefe de Control de Calidad e Inocuidad",
-    rol: "calidad",
-    cedula: "V-18.452.910",
-    password: "arawak2026",
-    creadoEn: "2026-09-01",
-  },
-  {
-    id: "usr_admin",
-    nombre: "Administrador QA Arawak",
-    email: "calidad@arawak.com",
-    cargo: "Dirección de Aseguramiento de Calidad",
-    rol: "calidad",
-    cedula: "V-20.100.200",
-    password: "arawak2026",
-    creadoEn: "2026-09-01",
-  },
-];
+const DEMO_IDS = new Set(["usr_roberto", "usr_pedro", "usr_laura", "usr_admin"]);
+
+// Limpieza automática de datos demo/antiguos en clientes locales
+if (typeof window !== "undefined") {
+  try {
+    const isCleaned = localStorage.getItem("arawak_v2_clean_done");
+    if (!isCleaned) {
+      localStorage.removeItem("arawak_saneamiento_data");
+      localStorage.removeItem("arawak_higiene_data");
+      localStorage.removeItem("arawak_limpieza_ejecucion_v1");
+      localStorage.removeItem("arawak_limpieza_inspeccion_v1");
+      localStorage.removeItem("arawak_arranque_actas_v1");
+      localStorage.removeItem("arawak_materia_prima_registro_v1");
+      localStorage.removeItem("arawak_materia_prima_historico_v1");
+      localStorage.removeItem("arawak_analisis_proceso_v1");
+      localStorage.removeItem("arawak_users_db_v2");
+      localStorage.removeItem("arawak_user_profile");
+      localStorage.removeItem("qc_auth");
+
+      for (let i = localStorage.length - 1; i >= 0; i--) {
+        const key = localStorage.key(i);
+        if (
+          key &&
+          (key.startsWith("arawak_usr_") ||
+            key.startsWith("arawak_saneamiento_") ||
+            key.startsWith("arawak_higiene_"))
+        ) {
+          localStorage.removeItem(key);
+        }
+      }
+
+      localStorage.setItem("arawak_v2_clean_done", "true");
+    }
+  } catch {}
+}
+
+export const DEFAULT_USUARIO_VACIO: UsuarioArawak = {
+  id: "usr_calidad",
+  nombre: "Inspector de Guardia",
+  cargo: "Control de Calidad",
+  rol: "calidad",
+};
+
+export const USUARIOS_INICIALES: (UsuarioArawak & { password: string })[] = [];
 
 export function getUsuariosRegistrados(): (UsuarioArawak & { password: string })[] {
-  if (typeof window === "undefined") return USUARIOS_INICIALES;
+  if (typeof window === "undefined") return [];
   try {
     const raw = localStorage.getItem("arawak_users_db_v2");
     if (raw) {
       const parsed = JSON.parse(raw);
-      if (Array.isArray(parsed) && parsed.length > 0) {
-        return parsed;
+      if (Array.isArray(parsed)) {
+        // Filtrar usuarios demo creados previamente
+        const limpios = parsed.filter((u: any) => !DEMO_IDS.has(u.id));
+        if (limpios.length !== parsed.length) {
+          localStorage.setItem("arawak_users_db_v2", JSON.stringify(limpios));
+        }
+        return limpios;
       }
     }
   } catch {}
 
-  // Initialize DB if not present
-  if (typeof window !== "undefined") {
-    localStorage.setItem("arawak_users_db_v2", JSON.stringify(USUARIOS_INICIALES));
-  }
-  return USUARIOS_INICIALES;
+  return [];
 }
 
 export interface DatosRegistroUsuario {
@@ -138,31 +141,30 @@ export function autenticarUsuario(identificador: string, password: string): Usua
   });
 
   if (match) {
-    if (match.password === password.trim() || password === "arawak2026" || password === "123456") {
+    if (match.password === password.trim()) {
       setUsuarioActual(match);
       return match;
     }
-  }
-
-  // Fallback for default admin
-  if ((term === "admin" || term === "calidad@arawak.com" || term.includes("calidad")) && (password === "arawak2026" || password === "123456")) {
-    const adminUser = USUARIOS_INICIALES[3];
-    setUsuarioActual(adminUser);
-    return adminUser;
   }
 
   return null;
 }
 
 export function getUsuarioActual(): UsuarioArawak {
-  if (typeof window === "undefined") return USUARIOS_INICIALES[0];
+  if (typeof window === "undefined") return DEFAULT_USUARIO_VACIO;
   try {
     const raw = localStorage.getItem("arawak_user_profile");
     if (raw) {
-      return JSON.parse(raw);
+      const parsed = JSON.parse(raw);
+      if (parsed && !DEMO_IDS.has(parsed.id)) {
+        return parsed;
+      } else {
+        localStorage.removeItem("arawak_user_profile");
+        localStorage.removeItem("qc_auth");
+      }
     }
   } catch {}
-  return USUARIOS_INICIALES[0];
+  return DEFAULT_USUARIO_VACIO;
 }
 
 export function setUsuarioActual(usuario: UsuarioArawak) {
