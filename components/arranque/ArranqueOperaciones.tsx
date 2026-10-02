@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import {
   PlayCircle,
@@ -25,7 +25,13 @@ import {
   BadgeAlert,
   ArrowRight,
   PenTool,
+  FileSpreadsheet,
+  Upload,
 } from "lucide-react";
+import {
+  exportarArranqueOperacionesExcel,
+  importarArranqueOperacionesExcel,
+} from "@/lib/excel-service";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -254,6 +260,32 @@ export function ArranqueOperaciones({ onIrALimpieza }: Props) {
       toast.warning("Sincronizado con Advertencias de Calidad", {
         description: `Se detectaron desviaciones en la limpieza de este galpón. Revise los requisitos.`,
       });
+    }
+  };
+
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleExportExcel = () => {
+    exportarArranqueOperacionesExcel(actas);
+    toast.success("Actas de Arranque exportadas a Excel con éxito (.xlsx)");
+  };
+
+  const handleImportExcel = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    try {
+      const res = await importarArranqueOperacionesExcel(file);
+      setActas((prev) => ({
+        "galpon-9": res["galpon-9"] ? { ...prev["galpon-9"], ...res["galpon-9"] } : prev["galpon-9"],
+        "galpon-8": res["galpon-8"] ? { ...prev["galpon-8"], ...res["galpon-8"] } : prev["galpon-8"],
+      }));
+      toast.success("Actas importadas desde Excel con éxito", {
+        description: `Archivo ${file.name} procesado correctamente.`,
+      });
+    } catch (err: any) {
+      toast.error("Error al importar Excel", { description: err?.message });
+    } finally {
+      if (fileInputRef.current) fileInputRef.current.value = "";
     }
   };
 
@@ -1016,6 +1048,33 @@ export function ArranqueOperaciones({ onIrALimpieza }: Props) {
                 Ir a Limpieza de Planta
               </Button>
             )}
+            <input
+              type="file"
+              ref={fileInputRef}
+              onChange={handleImportExcel}
+              accept=".xlsx,.xls"
+              className="hidden"
+            />
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => fileInputRef.current?.click()}
+              className="gap-1.5 border-border hover:bg-muted text-xs cursor-pointer"
+              title="Importar actas de inicio desde archivo Excel"
+            >
+              <Upload className="size-3.5 text-[#4b5e2a]" />
+              Importar Excel
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleExportExcel}
+              className="gap-1.5 border-border hover:bg-muted text-xs cursor-pointer"
+              title="Descargar actas de arranque en archivo Excel (.xlsx)"
+            >
+              <FileSpreadsheet className="size-3.5 text-[#4b5e2a]" />
+              Exportar Excel
+            </Button>
             <Button
               variant="outline"
               size="sm"

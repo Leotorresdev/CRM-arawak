@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import {
   FlaskConical,
@@ -16,6 +16,8 @@ import {
   Plus,
   Trash2,
   Download,
+  Upload,
+  FileSpreadsheet,
   Info,
   Check,
   ShieldCheck,
@@ -27,6 +29,10 @@ import {
   Edit2,
   PenTool,
 } from "lucide-react";
+import {
+  exportarAnalisisProcesoExcel,
+  importarAnalisisProcesoExcel,
+} from "@/lib/excel-service";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -286,40 +292,47 @@ export function AnalisisProceso() {
     window.print();
   };
 
-  const handleExportCSV = () => {
-    const headers = ["Lote", "Producto", "Fecha", "Bach Cantidad", "Total kg", "Dictamen", "Inspector"];
-    const row = [
-      registro.lote,
-      `"${registro.producto}"`,
-      registro.fecha,
-      registro.cantidadBachs,
-      registro.totalProducidoKg,
-      registro.dictamen,
-      `"${registro.firmas.inspector.nombre}"`,
-    ];
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
-    const paramsHeaders = ["ID Parámetro", "Análisis", "Unidad", "Especificación", "Valor", "Estado"];
-    const paramRows = registro.parametros.map((p) => [
-      p.id,
-      `"${p.nombre}"`,
-      `"${p.unidad}"`,
-      `"${p.especificacion || ""}"`,
-      `"${p.valor}"`,
-      p.estado,
-    ]);
+  const handleExportExcel = () => {
+    exportarAnalisisProcesoExcel(registro);
+    toast.success("Análisis de Proceso exportado a Excel con éxito (.xlsx)");
+  };
 
-    const csvContent =
-      "data:text/csv;charset=utf-8," +
-      [headers.join(","), row.join(","), "", paramsHeaders.join(","), ...paramRows.map((r) => r.join(","))].join("\n");
-
-    const encodedUri = encodeURI(csvContent);
-    const link = document.createElement("a");
-    link.setAttribute("href", encodedUri);
-    link.setAttribute("download", `Arawak_Analisis_Proceso_${registro.lote}.csv`);
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    toast.success("CSV de Análisis de Proceso exportado");
+  const handleImportExcel = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    try {
+      const res = await importarAnalisisProcesoExcel(file);
+      setRegistro((prev) => {
+        let nuevosParams = [...prev.parametros];
+        if (res.parametros && res.parametros.length > 0) {
+          res.parametros.forEach((imp) => {
+            const idx = nuevosParams.findIndex((p) => p.nombre.toLowerCase() === imp.nombre.toLowerCase());
+            if (idx >= 0) {
+              nuevosParams[idx] = {
+                ...nuevosParams[idx],
+                valor: imp.valor,
+                estado: imp.estado || nuevosParams[idx].estado,
+              };
+            }
+          });
+        }
+        return {
+          ...prev,
+          lote: res.lote || prev.lote,
+          cantidadBachs: res.cantidadBachs !== undefined ? res.cantidadBachs : prev.cantidadBachs,
+          parametros: nuevosParams,
+        };
+      });
+      toast.success("Análisis de Proceso importado desde Excel", {
+        description: `Datos actualizados desde ${file.name}.`,
+      });
+    } catch (err: any) {
+      toast.error("Error al importar Excel", { description: err?.message });
+    } finally {
+      if (fileInputRef.current) fileInputRef.current.value = "";
+    }
   };
 
   return (
@@ -363,14 +376,32 @@ export function AnalisisProceso() {
               <Plus className="size-3.5" />
               Crear Nuevo Campo / Análisis
             </Button>
+            <input
+              type="file"
+              ref={fileInputRef}
+              onChange={handleImportExcel}
+              accept=".xlsx,.xls"
+              className="hidden"
+            />
             <Button
               variant="outline"
               size="sm"
-              onClick={handleExportCSV}
-              className="gap-1.5 border-border hover:bg-muted text-xs"
+              onClick={() => fileInputRef.current?.click()}
+              className="gap-1.5 border-border hover:bg-muted text-xs cursor-pointer"
+              title="Importar ensayos físico-químicos desde archivo Excel"
             >
-              <Download className="size-3.5" />
-              CSV
+              <Upload className="size-3.5 text-[#4b5e2a]" />
+              Importar Excel
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleExportExcel}
+              className="gap-1.5 border-border hover:bg-muted text-xs cursor-pointer"
+              title="Descargar análisis y liberación de bachs en archivo Excel (.xlsx)"
+            >
+              <FileSpreadsheet className="size-3.5 text-[#4b5e2a]" />
+              Exportar Excel
             </Button>
             <Button
               variant="outline"

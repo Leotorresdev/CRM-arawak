@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import {
   Wheat,
@@ -15,6 +15,8 @@ import {
   Layers,
   FileCheck2,
   Download,
+  Upload,
+  FileSpreadsheet,
   Info,
   ChevronRight,
   ChevronLeft,
@@ -28,6 +30,10 @@ import {
   AlertCircle,
   PenTool,
 } from "lucide-react";
+import {
+  exportarMateriaPrimaExcel,
+  importarMateriaPrimaExcel,
+} from "@/lib/excel-service";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -245,56 +251,27 @@ export function MateriaPrima() {
     window.print();
   };
 
-  const handleExportCSV = () => {
-    const headers = [
-      "ID",
-      "Semana",
-      "Tipo MP",
-      "Fecha Llegada",
-      "Fecha Procesado",
-      "Proveedor",
-      "Cédula/RIF",
-      "Placa",
-      "Peso Carga (kg)",
-      "Origen",
-      "Calibre",
-      "Edad/Cluster",
-      "Visual",
-      "pH",
-      "Brix",
-      "Deshidratación",
-      "Total Procesado (kg)",
-    ];
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
-    const row = [
-      registro.id,
-      `"${registro.semanaRecepcion}"`,
-      `"${registro.tipoMateriaPrima}"`,
-      registro.fechaLlegada,
-      registro.fechaProcesado,
-      `"${registro.proveedor}"`,
-      `"${registro.cedula}"`,
-      `"${registro.placa}"`,
-      registro.pesoCargaKg,
-      `"${registro.origenCarga}"`,
-      `"${registro.calibre}"`,
-      `"${registro.dedosClusterOEdad}"`,
-      `"${registro.evaluacionVisual}"`,
-      registro.phMateriaPrima,
-      registro.brix,
-      `"${registro.tiempoDeshidratacion}"`,
-      registro.totalProcesadoKg,
-    ];
+  const handleExportExcel = () => {
+    exportarMateriaPrimaExcel(registro, historico);
+    toast.success("Ficha Técnica y Recepción exportadas a Excel (.xlsx)");
+  };
 
-    const csvContent = "data:text/csv;charset=utf-8," + [headers.join(","), row.join(",")].join("\n");
-    const encodedUri = encodeURI(csvContent);
-    const link = document.createElement("a");
-    link.setAttribute("href", encodedUri);
-    link.setAttribute("download", `Arawak_MateriaPrima_${registro.id}.csv`);
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    toast.success("CSV exportado exitosamente");
+  const handleImportExcel = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    try {
+      const res = await importarMateriaPrimaExcel(file);
+      setRegistro((prev) => ({ ...prev, ...res }));
+      toast.success("Materia Prima importada desde Excel con éxito", {
+        description: `Datos cargados desde ${file.name}.`,
+      });
+    } catch (err: any) {
+      toast.error("Error al importar Excel", { description: err?.message });
+    } finally {
+      if (fileInputRef.current) fileInputRef.current.value = "";
+    }
   };
 
   return (
@@ -338,14 +315,32 @@ export function MateriaPrima() {
               <Info className="size-3.5 text-[#4b5e2a]" />
               {vista === "normativa" ? "Volver al Formulario" : "Ficha Técnica Calibres"}
             </Button>
+            <input
+              type="file"
+              ref={fileInputRef}
+              onChange={handleImportExcel}
+              accept=".xlsx,.xls"
+              className="hidden"
+            />
             <Button
               variant="outline"
               size="sm"
-              onClick={handleExportCSV}
-              className="gap-1.5 border-border hover:bg-muted text-xs"
+              onClick={() => fileInputRef.current?.click()}
+              className="gap-1.5 border-border hover:bg-muted text-xs cursor-pointer"
+              title="Importar recepción y calibres desde archivo Excel"
             >
-              <Download className="size-3.5" />
-              CSV
+              <Upload className="size-3.5 text-[#4b5e2a]" />
+              Importar Excel
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleExportExcel}
+              className="gap-1.5 border-border hover:bg-muted text-xs cursor-pointer"
+              title="Descargar ficha técnica y lote en archivo Excel (.xlsx)"
+            >
+              <FileSpreadsheet className="size-3.5 text-[#4b5e2a]" />
+              Exportar Excel
             </Button>
             <Button
               variant="outline"

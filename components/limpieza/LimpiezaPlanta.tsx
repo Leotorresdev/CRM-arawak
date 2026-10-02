@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import {
   Printer,
@@ -22,11 +22,16 @@ import {
   ChevronUp,
   FileSpreadsheet,
   Download,
+  Upload,
   Clock,
   HelpCircle,
   AlertCircle,
   PenTool,
 } from "lucide-react";
+import {
+  exportarLimpiezaPlantaExcel,
+  importarLimpiezaPlantaExcel,
+} from "@/lib/excel-service";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -368,63 +373,64 @@ export function LimpiezaPlanta() {
     };
   }, [inspeccionData, ejecucionData]);
 
-  // Export CSV
-  const handleExportCSV = () => {
-    const headers = [
-      "ID",
-      "Área / Equipo",
-      "Categoría",
-      "Frecuencia",
-      "Turno Responsable",
-      "P1 Limpieza Seco",
-      "P2 Enjuague Inicial",
-      "P3 Detergente",
-      "P4 Fregado Contacto",
-      "P5 Enjuague Jabón",
-      "P6 Desinfectante",
-      "P7 Enjuague Desinfectante",
-      "P8 Secado",
-      "Conforme",
-      "No Conforme",
-      "Correctivo",
-      "Acción Correctiva",
-      "Observación del Área",
-    ];
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
-    const rows = areasEquiposLimpieza.map((a) => {
-      const ej = ejecucionData[a.id];
-      const ins = inspeccionData[a.id];
-      return [
-        a.id,
-        `"${a.nombre}"`,
-        `"${a.categoria}"`,
-        `"${a.frecuencia}"`,
-        `"${ej?.turnoResponsable || ""}"`,
-        ej?.paso1_prelimpiezaSeco ? "SÍ" : "NO",
-        ej?.paso2_enjuagueInicialAgua ? "SÍ" : "NO",
-        ej?.paso3_aplicacionDetergente ? "SÍ" : "NO",
-        ej?.paso4_fregadoContacto ? "SÍ" : "NO",
-        ej?.paso5_enjuagueFinalJabon ? "SÍ" : "NO",
-        ej?.paso6_aplicacionDesinfectante ? "SÍ" : "NO",
-        ej?.paso7_enjuagueFinalDesinfectante ? "SÍ" : "NO",
-        ej?.paso8_secado ? "SÍ" : "NO",
-        ins?.conforme ? "CONFORME" : "",
-        ins?.noConforme ? "NO CONFORME" : "",
-        ins?.correctivo ? "CORRECTIVO" : "",
-        `"${ins?.accionCorrectiva || ""}"`,
-        `"${ins?.observacionArea || ""}"`,
-      ].join(",");
+  // Export Excel (.xlsx)
+  const handleExportExcel = () => {
+    exportarLimpiezaPlantaExcel(
+      ejecucionData,
+      inspeccionData,
+      areasEquiposLimpieza,
+      fechaLimpieza,
+      turnoGlobal,
+      firmaCalidadInspeccion
+    );
+    toast.success("Archivo Excel exportado con éxito", {
+      description: "Libro con Cuadro 1 (8 Pasos) y Cuadro 2 (Inspección QA) descargado.",
     });
+  };
 
-    const csvContent = "data:text/csv;charset=utf-8," + [headers.join(","), ...rows].join("\n");
-    const encodedUri = encodeURI(csvContent);
-    const link = document.createElement("a");
-    link.setAttribute("href", encodedUri);
-    link.setAttribute("download", `Arawak_Limpieza_Planta_${fechaLimpieza}.csv`);
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    toast.success("Reporte CSV descargado con éxito");
+  // Import Excel (.xlsx / .xls)
+  const handleImportExcel = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    try {
+      const res = await importarLimpiezaPlantaExcel(file);
+      let count = 0;
+      if (res.ejecucion && Object.keys(res.ejecucion).length > 0) {
+        setEjecucionData((prev) => {
+          const next = { ...prev };
+          Object.entries(res.ejecucion!).forEach(([idStr, val]) => {
+            const id = Number(idStr);
+            if (next[id]) {
+              next[id] = { ...next[id], ...val, areaId: id };
+            }
+          });
+          return next;
+        });
+        count += Object.keys(res.ejecucion).length;
+      }
+      if (res.inspeccion && Object.keys(res.inspeccion).length > 0) {
+        setInspeccionData((prev) => {
+          const next = { ...prev };
+          Object.entries(res.inspeccion!).forEach(([idStr, val]) => {
+            const id = Number(idStr);
+            if (next[id]) {
+              next[id] = { ...next[id], ...val, areaId: id };
+            }
+          });
+          return next;
+        });
+        count += Object.keys(res.inspeccion).length;
+      }
+      toast.success("Archivo Excel importado con éxito", {
+        description: `Se actualizaron datos de limpieza para ${count} registros desde ${file.name}.`,
+      });
+    } catch (err: any) {
+      toast.error("Error al importar Excel", { description: err?.message });
+    } finally {
+      if (fileInputRef.current) fileInputRef.current.value = "";
+    }
   };
 
   const handlePrint = () => {
@@ -472,14 +478,32 @@ export function LimpiezaPlanta() {
               <BookOpen className="size-3.5 text-[#4b5e2a]" />
               {mostrarGuia8Pasos ? "Ocultar Guía POES" : "Guía 8 Pasos POES"}
             </Button>
+            <input
+              type="file"
+              ref={fileInputRef}
+              onChange={handleImportExcel}
+              accept=".xlsx,.xls"
+              className="hidden"
+            />
             <Button
               variant="outline"
               size="sm"
-              onClick={handleExportCSV}
-              className="gap-1.5 border-border hover:bg-muted text-xs"
+              onClick={() => fileInputRef.current?.click()}
+              className="gap-1.5 border-border hover:bg-muted text-xs cursor-pointer"
+              title="Importar registros de limpieza desde archivo Excel"
             >
-              <Download className="size-3.5" />
-              Exportar CSV
+              <Upload className="size-3.5 text-[#4b5e2a]" />
+              Importar Excel
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleExportExcel}
+              className="gap-1.5 border-border hover:bg-muted text-xs cursor-pointer"
+              title="Descargar libro POES en formato Excel (.xlsx)"
+            >
+              <FileSpreadsheet className="size-3.5 text-[#4b5e2a]" />
+              Exportar Excel
             </Button>
             <Button
               variant="outline"

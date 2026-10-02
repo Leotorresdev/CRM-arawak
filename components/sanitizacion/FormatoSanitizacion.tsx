@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import {
   Printer,
@@ -17,7 +17,12 @@ import {
   UserCheck,
   ShieldCheck,
   FileSpreadsheet,
+  Upload,
 } from "lucide-react";
+import {
+  exportarSanitizacionExcel,
+  importarSanitizacionExcel,
+} from "@/lib/excel-service";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -202,6 +207,48 @@ export function FormatoSanitizacion() {
     toast.success(`Todos los parámetros marcados como Conformes para hoy (${targetDay.toUpperCase()}).`);
   };
 
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleImportExcel = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    try {
+      const res = await importarSanitizacionExcel(file);
+      let count = 0;
+      if (res.saneamientoItems && res.saneamientoItems.length > 0) {
+        setSaneamientoItems((prev) =>
+          prev.map((item, idx) => {
+            const match = res.saneamientoItems?.find((s) => s.id === item.id) || res.saneamientoItems?.[idx];
+            if (match?.valoresDias) {
+              count++;
+              return { ...item, valoresDias: match.valoresDias };
+            }
+            return item;
+          })
+        );
+      }
+      if (res.higieneItems && res.higieneItems.length > 0) {
+        setHigieneItems((prev) =>
+          prev.map((item, idx) => {
+            const match = res.higieneItems?.find((h) => h.id === item.id) || res.higieneItems?.[idx];
+            if (match?.valoresDias) {
+              count++;
+              return { ...item, valoresDias: match.valoresDias };
+            }
+            return item;
+          })
+        );
+      }
+      toast.success("Archivo Excel importado con éxito", {
+        description: `Se han actualizado los registros de sanitización desde ${file.name}.`,
+      });
+    } catch (err: any) {
+      toast.error("Error al importar Excel", { description: err?.message });
+    } finally {
+      if (fileInputRef.current) fileInputRef.current.value = "";
+    }
+  };
+
   const handleGuardarCambios = async () => {
     if (typeof window !== "undefined") {
       localStorage.setItem("arawak_saneamiento_data", JSON.stringify(saneamientoItems));
@@ -333,22 +380,50 @@ export function FormatoSanitizacion() {
               <span className="text-xs font-bold font-mono">{semanaInfo.texto}</span>
             </div>
 
+            <input
+              type="file"
+              ref={fileInputRef}
+              onChange={handleImportExcel}
+              accept=".xlsx,.xls"
+              className="hidden"
+            />
+
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => fileInputRef.current?.click()}
+              className="gap-1.5 cursor-pointer text-xs"
+              title="Importar registro semanal desde archivo Excel"
+            >
+              <Upload className="size-3.5 text-[#4b5e2a]" /> Importar Excel
+            </Button>
+
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => exportarSanitizacionExcel(saneamientoItems, higieneItems, semanaInfo.texto, firmaCalidadSaneamiento)}
+              className="gap-1.5 cursor-pointer text-xs"
+              title="Descargar registro en archivo Excel (.xlsx)"
+            >
+              <FileSpreadsheet className="size-3.5 text-[#4b5e2a]" /> Exportar Excel
+            </Button>
+
             <Button
               variant="outline"
               size="sm"
               onClick={() => window.print()}
-              className="gap-2 cursor-pointer print:hidden"
+              className="gap-2 cursor-pointer print:hidden text-xs"
               title="Imprimir formato oficial para auditoría"
             >
-              <Printer className="size-4" /> Imprimir Formato
+              <Printer className="size-3.5" /> Imprimir
             </Button>
 
             <Button
               size="sm"
               onClick={handleGuardarCambios}
-              className="gap-2 bg-[#4b5e2a] hover:bg-[#3d4d22] text-white cursor-pointer shadow-sm"
+              className="gap-2 bg-[#4b5e2a] hover:bg-[#3d4d22] text-white cursor-pointer shadow-sm text-xs"
             >
-              <Save className="size-4" /> Guardar Cambios
+              <Save className="size-3.5" /> Guardar Cambios
             </Button>
           </div>
         </div>
